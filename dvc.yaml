@@ -2,22 +2,10 @@ stages:
   data_load:
     cmd: python dataloader.py
     deps:
-      - forestfires.csv
-      - dataloader.py
+    - forestfires.csv
+    - dataloader.py
     outs:
-      - train.csv
-      - test.csv
-      - train_filtered.csv
-      - test_filtered.csv
-  train:
-    cmd: python Forestfires_Prediction.py
-    deps:
-      - Forestfires_Prediction.py
-      - train.csv
-      - test.csv
-      - train_filtered.csv
-      - test_filtered.csv
-    outs:
-      - model_weights/rf_model.pkl
-      - model_weights/xbg_model.pkl
-      - model_weights/xgb_tuned_model.pkl
+    - train.csv
+    - test.csv
+    - train_filtered.csv
+    - test_filtered.csv
