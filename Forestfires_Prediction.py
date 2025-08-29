@@ -14,10 +14,11 @@ from sklearn.model_selection import GridSearchCV, cross_val_score
 
 import mlflow
 import pickle
-X_train = pd.read_csv('train.csv').drop('area', axis = 1)
-y_train = pd.read_csv('train.csv')['area']
-X_test = pd.read_csv('test.csv').drop('area', axis = 1)
-y_test = pd.read_csv('test.csv')['area']
+
+X_train = pd.read_csv('data/train.csv').drop('area', axis = 1)
+y_train = pd.read_csv('data/train.csv')['area']
+X_test = pd.read_csv('data/test.csv').drop('area', axis = 1)
+y_test = pd.read_csv('data/test.csv')['area']
 
 mlflow.set_tracking_uri("http://localhost:5000")
 mlflow.set_experiment('Fireforest')
@@ -49,10 +50,10 @@ with mlflow.start_run():
         print()
         print("Попробуем убрать выбросы и посмотреть на значения ошибок")
 
-        X_train_filtered = pd.read_csv('train_filtered.csv').drop('area', axis = 1)
-        y_train_filtered = pd.read_csv('train_filtered.csv')['area']
-        X_test_filtered = pd.read_csv('test_filtered.csv').drop('area', axis=1)
-        y_test_filtered = pd.read_csv('test_filtered.csv')['area']
+        X_train_filtered = pd.read_csv('data/train_filtered.csv').drop('area', axis = 1)
+        y_train_filtered = pd.read_csv('data/train_filtered.csv')['area']
+        X_test_filtered = pd.read_csv('data/test_filtered.csv').drop('area', axis=1)
+        y_test_filtered = pd.read_csv('data/test_filtered.csv')['area']
 
         rf_model = RandomForestRegressor(n_estimators = rf_n_estimators,
                                       min_samples_split=min_samples_split,
@@ -90,17 +91,18 @@ with mlflow.start_run():
         plt.figure(figsize=(10, 8))
         sns.barplot(data = feature_imp.head(10), x = 'importance', y = 'feature',alpha = 0.8)
         plt.title('График важности фичей')
-        plt.show()
         plt.savefig("rf_feature_imp.png")
         plt.close()
-
         mlflow.log_artifact("rf_feature_imp.png", "rf_hist")
+        plt.show()
 
         with open('model_weights/rf_model.pkl', 'wb') as f:
             pickle.dump(rf_model, f)
 
         print("RMSE и MAE стали значительно ниже, но недостаточно (из-за большого количества нулей в датасете).  Топ фичи - это температура и DC, логично лидируют, так как сухость/жара провоцируют пожары")
         print()
+        mlflow.end_run()
+
     with mlflow.start_run(run_name = 'Gradient Boosting', nested = True):
         print("Воспользуемся градиентным бустингом **XGBoost**")
 
@@ -142,21 +144,22 @@ with mlflow.start_run():
         print(f'CV score {-1*cv_score.mean():.2f}')
 
     #График важности фичей
-    feature_imp = pd.DataFrame({
+        feature_imp = pd.DataFrame({
         'feature': X_train_filtered.columns,
         'importance': xgb_model.feature_importances_
-    }).sort_values('importance', ascending = False)
+        }).sort_values('importance', ascending = False)
 
-    plt.figure(figsize=(10, 8))
-    sns.barplot(data = feature_imp.head(10), x = 'importance', y = 'feature',alpha = 0.8)
-    plt.title('График важности фичей')
-    plt.show()
-    plt.savefig('xgb_feature_imp.png')
-    plt.close()
+        plt.figure(figsize=(10, 8))
+        sns.barplot(data = feature_imp.head(10), x = 'importance', y = 'feature',alpha = 0.8)
+        plt.title('График важности фичей')
+        plt.savefig('xgb_feature_imp.png')
+        plt.close()
+        mlflow.log_artifact('xgb_feature_imp.png', 'xgb_hist')
+        plt.show()
 
-    print("Он показал результаты немного хуже, чем Random Forest. Скорее всего, из-за малого количества решающих пней в градиентном бустинге. Также для него наиболее важными оказались другие фичи - дни недели и месяц. Подберем гиперпараметры, чтобы улучшить значения метрик")
-    print()
-    
+        print("Он показал результаты немного хуже, чем Random Forest. Скорее всего, из-за малого количества решающих пней в градиентном бустинге. Также для него наиболее важными оказались другие фичи - дни недели и месяц. Подберем гиперпараметры, чтобы улучшить значения метрик")
+        print()
+        mlflow.end_run()
     # 4. **Подбор гиперпараметров**
     
     print("Воспользуемся библиотекой **Optuna** для точного подбора гиперпараметров")
@@ -243,3 +246,5 @@ with mlflow.start_run():
         mlflow.sklearn.log_model(model, 'XGBoost tuned', signature = signature, input_example = X_train_filtered)
 
         print(f"Результаты показывают прогресс: {xgb_rmse:.2f} для базового градиентного бустинга и {rmse:.2f} - для тюнингованого. XGBoost после подбора гиперпараметров превзошел Random Forest.")
+        mlflow.end_run()
+    mlflow.end_run()
