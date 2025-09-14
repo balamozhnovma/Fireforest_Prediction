@@ -5,7 +5,10 @@ stages:
       - forestfires.csv
       - dataloader.py
     outs:
-      - data/  # вместо отдельных файлов - вся папка
+    - data/test.csv
+    - data/test_filtered.csv
+    - data/train.csv
+    - data/train_filtered.csv
   train:
     cmd: python Forestfires_Prediction.py
     deps:
