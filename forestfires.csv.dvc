@@ -3,3 +3,4 @@ outs:
   size: 25478
   hash: md5
   path: forestfires.csv
+  isexec: true
