@@ -36,7 +36,7 @@ y_2 = data_2['area']
 
 X_train_2, X_test_2, y_train_2, y_test_2 = train_test_split(X_2, y_2, test_size = 0.2, random_state = 42)
 
-pd.concat([X_train, y_train], axis  = 1).to_csv('train.csv', index = False)
-pd.concat([X_test, y_test], axis  = 1).to_csv('test.csv', index = False)
-pd.concat([X_train_2, y_train_2], axis = 1).to_csv('train_filtered.csv', index = False)
-pd.concat([X_test_2, y_test_2], axis = 1).to_csv('test_filtered.csv', index = False)
+pd.concat([X_train, y_train], axis  = 1).to_csv('data/train.csv', index = False)
+pd.concat([X_test, y_test], axis  = 1).to_csv('data/test.csv', index = False)
+pd.concat([X_train_2, y_train_2], axis = 1).to_csv('data/train_filtered.csv', index = False)
+pd.concat([X_test_2, y_test_2], axis = 1).to_csv('data/test_filtered.csv', index = False)
