@@ -20,7 +20,7 @@ y_train = pd.read_csv('data/train.csv')['area']
 X_test = pd.read_csv('data/test.csv').drop('area', axis = 1)
 y_test = pd.read_csv('data/test.csv')['area']
 
-mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_tracking_uri("http://localhost:5050")
 mlflow.set_experiment('Fireforest')
 
 with mlflow.start_run():
