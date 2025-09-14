@@ -168,7 +168,6 @@ with mlflow.start_run():
     from optuna.samplers import TPESampler
     
     def optimize_xgboost(trial, X_train, y_train):
-        with mlflow.start_run(nested = True):
           params = {
               'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
               'max_depth': trial.suggest_int('max_depth', 2, 10),
@@ -184,7 +183,7 @@ with mlflow.start_run():
           model = xgb.XGBRegressor(**params)
           scores = cross_val_score(model, X_train, y_train, cv = 5, scoring = 'neg_root_mean_squared_error')
           return -scores.mean()
-    
+
     class EarlyStoppingExceeded(Exception):
         pass
     
@@ -192,26 +191,26 @@ with mlflow.start_run():
         window_size = 20
         min_delta = 0.01
         patience = 3
-    
+
         if not hasattr(study, '_early_stop_counter'):
             study._early_stop_counter = 0
-    
+
         if len(study.trials) < window_size:
             return
-    
+
         completed_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
-    
+
         if len(completed_trials) < window_size:
             return
-    
+
         best_in_window = min(t.value for t in completed_trials[-window_size:])
         global_best = study.best_value
-    
+
         if best_in_window >= global_best - min_delta:
             study._early_stop_counter += 1
             print(f"Потенциальная остановка ({study._early_stop_counter}/{patience}): "
                   f"Лучшее в окне {best_in_window:.4f} vs глобальное {global_best:.4f}")
-    
+
             if study._early_stop_counter >= patience:
                 print(f" Вызываем остановку: нет улучшений > {min_delta} в последних {window_size*patience} trials")
                 raise EarlyStoppingExceeded()
@@ -243,7 +242,7 @@ with mlflow.start_run():
         mlflow.log_params(study.best_params)
         mlflow.log_metric('RMSE XGBoost tuned', root_mean_squared_error(y_test_filtered, y_pred))
         mlflow.log_metric('MAE XGboost tuned', mean_absolute_error(y_test_filtered, y_pred))
-        mlflow.sklearn.log_model(model, 'XGBoost tuned', signature = signature, input_example = X_train_filtered)
+        mlflow.xgboost.log_model(model, 'XGBoost tuned', signature = signature, input_example = X_train_filtered)
 
         print(f"Результаты показывают прогресс: {xgb_rmse:.2f} для базового градиентного бустинга и {rmse:.2f} - для тюнингованого. XGBoost после подбора гиперпараметров превзошел Random Forest.")
         mlflow.end_run()
