@@ -2,22 +2,19 @@ stages:
   data_load:
     cmd: python dataloader.py
     deps:
-    - forestfires.csv
-    - dataloader.py
+      - forestfires.csv
+      - dataloader.py
     outs:
-    - data/train.csv
-    - data/test.csv
-    - data/train_filtered.csv
-    - data/test_filtered.csv
+      - data/  # вместо отдельных файлов - вся папка
   train:
     cmd: python Forestfires_Prediction.py
     deps:
-      - Forestfires_Prediction.py
-      - data/test.csv
-      - data/test_filtered.csv
-      - data/train.csv
-      - data/train_filtered.csv
+    - Forestfires_Prediction.py
+    - data/test.csv
+    - data/test_filtered.csv
+    - data/train.csv
+    - data/train_filtered.csv
     outs:
-      - model_weights/rf_model.pkl
-      - model_weights/xgb_model.pkl
-      - model_weights/xgb_tuned_model.pkl
+    - model_weights/rf_model.pkl
+    - model_weights/xgb_model.pkl
+    - model_weights/xgb_tuned_model.pkl
