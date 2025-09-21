@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forestfires-prediction-deployment
+  labels:
+    app: forestfires-prediction
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: forestfires-prediction
+  template:
+    metadata:
+      labels:
+        app: forestfires-prediction
+    spec:
+      containers:
+      - name: forestfires-prediction-app
+        image: poliaanna/forestfires_prediction:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MLFLOW_TRACKING_URI
+          value: "http://mlflow-service:5050"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelay: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelay: 30
+          periodSeconds: 10
