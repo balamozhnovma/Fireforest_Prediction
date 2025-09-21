@@ -4,9 +4,9 @@ from mlflow.tracking import MlflowClient
 import numpy as np
 
 app = Flask(__name__)
-mlflow.set_tracking_uri("http://localhost:5050")
+mlflow.set_tracking_uri("http://host.docker.internal:5050")
 client = MlflowClient()
-#Find the latest run_id in experiment
+
 try:
     experiment = client.get_experiment_by_name('Fireforest')
     if experiment is None:
@@ -50,7 +50,7 @@ def predict():
             return jsonify({'status': 'error', 'message': 'No data provided'})
         features = np.array([data[feature] for feature in FEATURES]).reshape(1, -1)
         prediction = model.predict(features)[0]
-        return jsonify({'status': 'ok', 'prediction': prediction})
+        return jsonify({'status': 'ok', 'prediction': float(prediction)})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
 
